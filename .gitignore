@@ -1,0 +1,25 @@
+# Dependencies & build output
+**/node_modules/
+**/dist/
+**/dist-ssr/
+
+# Logs & env
+*.log
+*.local
+.env
+.env.*
+
+# OS & editors
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Unrelated workspace projects (not part of Marketing Asset Hub)
+GUILD Website/
+Co-Founders/
+tools/
+
+# Cursor / local tooling
+.cursor/

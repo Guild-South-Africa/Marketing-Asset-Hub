@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Rubik', sans-serif;
+  --font-body: 'Inter', 'Geist', system-ui, sans-serif;
+  --color-guild-clay: #e37226;
+  --color-guild-amber: #fe980f;
+  --color-guild-sun: #f4b12e;
+  --color-guild-gold: #e1b43e;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+}
