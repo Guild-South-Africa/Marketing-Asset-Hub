@@ -121,23 +121,6 @@ Dark designs use `Brand/Guild sa white.png`. Light designs use `Brand/Master Log
 - **Stock photos** use manual cover-fit (not CSS `object-fit`) so exports stay undistorted in html2canvas
 - **Text layout** uses column constraints, dynamic CTA sizing, and overflow clipping to prevent overlap on export
 
-## Deployment (GitHub Pages)
-
-The app deploys automatically to GitHub Pages on every push to `main`.
-
-**Live site:** https://guild-south-africa.github.io/Marketing-Asset-Hub/
-
-### One-time GitHub setup
-
-1. Open [Marketing-Asset-Hub](https://github.com/Guild-South-Africa/Marketing-Asset-Hub) → **Settings** → **Pages**
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**
-
-The workflow in `.github/workflows/deploy.yml` builds `marketing-hub/` and publishes `dist/` to Pages.
-
-### Manual deploy trigger
-
-Push to `main`, or run the **Deploy to GitHub Pages** workflow from the **Actions** tab.
-
 ## Scripts
 
 | Command | Description |
