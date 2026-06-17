@@ -13,6 +13,12 @@ export const brand = {
   },
   /** Chromatic bars — burnt → bright → solid → muted */
   chromatic: ['#E37226', '#FE980F', '#F4B12E', '#E1B43E'] as const,
+  /** Abstract geometry — edge framing, kept secondary to type & photography */
+  geometry: {
+    shapeOpacity: { light: 0.13, dark: 0.34 },
+    dotGridOpacity: { light: 0.07, dark: 0.09 },
+    bracketColor: { light: '#E37226', dark: '#E1B43E' },
+  },
   event: {
     name: 'GUILD SA AI Buildathon 01',
     date: '01 August 2026',
