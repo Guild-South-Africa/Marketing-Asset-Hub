@@ -1,6 +1,7 @@
-import { marginX, lh } from '../../data/gridSystem'
+import { marginX, lh, bl } from '../../data/gridSystem'
 import { brand } from '../../data/brand'
 import { brandAssets, getEduvosLogo, getGuildHeaderLogo, getLovableLogo, getVelozTechLogo } from '../../utils/assetPaths'
+import { ChromaticBars } from './BrandDecor'
 
 const MONO = "'Inter', ui-monospace, monospace"
 
@@ -132,11 +133,18 @@ export function EcosystemPartnerBar({ s = 1 }: { s?: number }) {
       style={{
         marginTop: lh(2, s),
         background: brand.colors.black,
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
-        alignItems: 'stretch',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
+      <ChromaticBars s={s} direction="horizontal" thickness={bl(1, s)} />
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          alignItems: 'stretch',
+        }}
+      >
       {partners.map(({ label, node }, i) => (
         <div
           key={label}
@@ -165,6 +173,7 @@ export function EcosystemPartnerBar({ s = 1 }: { s?: number }) {
           {node}
         </div>
       ))}
+      </div>
     </div>
   )
 }
@@ -227,12 +236,10 @@ interface EcosystemLockupProps {
 /** Footer partner strip — VelozTech · Eduvos · Lovable (GUILD lives top-left) */
 export function EcosystemLockup({ s = 1, dark = false }: EcosystemLockupProps) {
   const padX = marginX(s)
-  const border = dark ? 'rgba(255,255,255,0.2)' : brand.colors.black
 
   return (
     <div
       style={{
-        borderTop: `${2 * s}px solid ${border}`,
         padding: `${20 * s}px ${padX}px`,
       }}
     >

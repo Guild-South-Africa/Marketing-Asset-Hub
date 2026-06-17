@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { brand } from '../../data/brand'
+import { GRID } from '../../data/gridSystem'
 import type { AssetContent } from '../../data/types'
 
 const accentMap = {
@@ -37,6 +38,13 @@ export function containedTextStyle(extra?: CSSProperties): CSSProperties {
   return { ...textContain, ...extra }
 }
 
+/** Snap display headline line-height to baseline grid — never below glyph bounds (export-safe). */
+export function headlineLineHeight(fontSize: number, s: number): number {
+  const step = GRID.baseline * s
+  const minHeight = fontSize * 1.06 + step * 0.5
+  return Math.max(Math.ceil(minHeight / step) * step, fontSize)
+}
+
 /** Scale header index — times and long strings need smaller type to avoid column bleed. */
 export function indexFontSize(index: string, s: number): number {
   const base = 160 * s
@@ -48,7 +56,7 @@ export function indexFontSize(index: string, s: number): number {
 
 export function indexLineHeight(index: string, s: number): number {
   const size = indexFontSize(index, s)
-  return Math.ceil((size * 0.92) / (8 * s)) * (8 * s)
+  return headlineLineHeight(size, s)
 }
 
 /** Shrink long footer CTAs so they stay inside the center grid column. */

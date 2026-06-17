@@ -2,6 +2,10 @@ import guildLogo from '@brand/Master Logo.png'
 import guildMasterSymbol from '@brand/Master_Symbol_qenm2q.png'
 import guildBlack from '@brand/GUILD Black.png'
 import guildWhite from '@brand/Guild sa white.png'
+import shape1 from '@brand/shape1.png'
+import shape2 from '@brand/shape2.png'
+import shape3 from '@brand/shape3.png'
+import shape4 from '@brand/shape4.png'
 
 import lovableLogoBlack from '@event/Sponsorships/Lovable/lovable-logo-black.png'
 import lovableLogoWhite from '@event/Sponsorships/Lovable/lovable-logo-white.png'
@@ -39,7 +43,13 @@ export const brandAssets = {
   velozTechWhite,
   eduvosBlue,
   eduvosWhite,
+  shape1,
+  shape2,
+  shape3,
+  shape4,
 } as const
+
+export const brandShapes = [shape1, shape2, shape3, shape4] as const
 
 export function getStockPhoto(index: number): string {
   if (stockPhotos.length === 0) return ''
