@@ -5,6 +5,7 @@ import {
   getTemplateMeta,
   getVisualConfig,
   resolveBody,
+  resolveBodyHeroNumber,
   resolveFooterCta,
   resolveHeadline,
   resolveHeaderMeta,
@@ -54,6 +55,8 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
   const cta = resolveFooterCta(asset, visual)
   const index = resolveIndex(asset, visual)
   const heroNumber = resolveHeroNumber(asset, visual)
+  const bodyHeroNumber = resolveBodyHeroNumber(asset, visual, true)
+  const backgroundHeroNumber = resolveBodyHeroNumber(asset, visual, false)
   const variant = resolveLayoutVariant(asset.templateSlug, asset)
   const headerMeta = resolveHeaderMeta(asset)
   const canvasDark = dark || variant === 'landscape-dark'
@@ -66,7 +69,9 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
         <DesignCanvas width={asset.width} height={asset.height} dark={dark}>
           <MetaHeader s={s} dark={dark} headerTag={headerMeta.headerTag} headerSeries={headerMeta.headerSeries} />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px`, position: 'relative' })}>
-            {heroNumber && <GiantBackgroundNumber s={s} value={heroNumber} dark={dark} />}
+            {backgroundHeroNumber && (
+              <GiantBackgroundNumber s={s} value={backgroundHeroNumber} dark={dark} />
+            )}
             <div style={{ ...bodyGrid(s), position: 'relative', zIndex: 1, minHeight: 0, height: '100%' }}>
               <div style={{ gridColumn: '1 / 8', minWidth: 0 }}>
                 {asset.content.eyebrow && (
@@ -258,20 +263,6 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
             </div>
             {!asset.content.cards && (
               <div style={{ gridColumn: '7 / 13', display: 'flex', flexDirection: 'column', gap: lh(1, s), minWidth: 0, overflow: 'hidden' }}>
-                {heroNumber === '280' && (
-                  <div
-                    style={{
-                      fontFamily: 'Rubik',
-                      fontSize: 120 * s,
-                      fontWeight: 800,
-                      color: brand.colors.brightOrange,
-                      textAlign: 'right',
-                      lineHeight: `${lh(5, s)}px`,
-                    }}
-                  >
-                    280
-                  </div>
-                )}
                 <PhotoModule s={s} stockIndex={asset.stockIndex} height={mediaHeight(17, s)} dark={canvasDark} />
               </div>
             )}
@@ -408,7 +399,7 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
               {asset.content.stats && <StatsRow s={s} stats={asset.content.stats} dark={dark} />}
             </div>
             <div style={{ gridColumn: '7 / 13', alignSelf: 'end', position: 'relative', minWidth: 0 }}>
-              {dark && heroNumber && (
+              {dark && bodyHeroNumber && (
                 <div
                   aria-hidden
                   style={{
@@ -428,7 +419,7 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
                     maxWidth: '100%',
                   }}
                 >
-                  {heroNumber}
+                  {bodyHeroNumber}
                 </div>
               )}
               <div style={{ position: 'relative', zIndex: 1 }}>

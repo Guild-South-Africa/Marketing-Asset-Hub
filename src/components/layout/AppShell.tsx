@@ -49,7 +49,6 @@ export function AppShell() {
               className="h-7 w-auto shrink-0 object-contain sm:h-8"
             />
             <div className="min-w-0">
-              <p className="truncate font-display text-sm font-bold tracking-wide">GUILD SA</p>
               <p className="hidden truncate text-[10px] uppercase tracking-[0.18em] text-zinc-500 min-[375px]:block">
                 Marketing Asset Hub
               </p>

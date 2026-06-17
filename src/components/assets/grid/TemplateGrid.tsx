@@ -2,10 +2,11 @@ import type { AgendaItem } from '../../../data/types'
 import type { ReactNode } from 'react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { brand } from '../../../data/brand'
-import { bl, GRID, gridScale, gutter, lh, marginX, mediaHeight } from '../../../data/gridSystem'
+import { bl, gridScale, gutter, lh, marginX, mediaHeight } from '../../../data/gridSystem'
 import { getStockPhoto } from '../../../utils/assetPaths'
 import { applyCoverFit } from '../../../utils/imageCover'
-import { ctaFontSize, indexFontSize, indexLineHeight } from '../layoutUtils'
+import { ctaFontSize, headlineLineHeight, indexFontSize, indexLineHeight } from '../layoutUtils'
+import { ChromaticBars, DitherOverlay, PosterBackdrop } from '../BrandDecor'
 import { EcosystemLockup, GuildHeaderLogo, PartnerLockupStrip } from '../BrandElements'
 
 const MONO = "'Inter', ui-monospace, monospace"
@@ -22,6 +23,8 @@ interface CanvasProps {
 }
 
 export function DesignCanvas({ width, height, dark = false, children }: CanvasProps) {
+  const s = scale(width)
+
   return (
     <div
       style={{
@@ -37,7 +40,21 @@ export function DesignCanvas({ width, height, dark = false, children }: CanvasPr
         isolation: 'isolate',
       }}
     >
-      {children}
+      <PosterBackdrop s={s} dark={dark} />
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          minHeight: 0,
+          width: '100%',
+        }}
+      >
+        {children}
+      </div>
+      <DitherOverlay s={s} dark={dark} />
     </div>
   )
 }
@@ -68,7 +85,13 @@ export function MetaHeader({ s, dark = false, headerTag, headerSeries, index }: 
       }}
     >
       <div style={{ gridColumn: '1 / 5', minWidth: 0 }}>
-        <div style={{ width: bl(9, s), height: bl(1, s), background: accent, marginBottom: bl(2, s) }} />
+        <ChromaticBars
+          s={s}
+          direction="horizontal"
+          thickness={bl(1, s)}
+          length={bl(9, s)}
+          style={{ marginBottom: bl(2, s) }}
+        />
         <GuildHeaderLogo height={lh(2, s) + bl(1, s)} dark={dark} />
         <div
           style={{
@@ -145,15 +168,14 @@ interface MetaFooterProps {
 export function MetaFooter({ s, dark, cta, showPartnerLockup = true }: MetaFooterProps) {
   const accent = brand.colors.mutedYellow
   const padX = marginX(s)
-  const border = dark ? 'rgba(255,255,255,0.25)' : brand.colors.black
   const ctaSize = ctaFontSize(cta, s)
 
   return (
     <div style={{ marginTop: 'auto', flexShrink: 0 }}>
       {showPartnerLockup && <EcosystemLockup s={s} dark={dark} />}
+      <ChromaticBars s={s} direction="horizontal" thickness={bl(1, s)} style={{ width: '100%' }} />
       <footer
         style={{
-          borderTop: `${2 * s}px solid ${border}`,
           padding: `${lh(1, s) + bl(1, s)}px ${padX}px`,
           display: 'grid',
           gridTemplateColumns: 'repeat(12, 1fr)',
@@ -203,22 +225,23 @@ interface HeadlineProps {
 }
 
 export function StackedHeadline({ s, lines, size = 108, dark }: HeadlineProps) {
-  const lineHeightPx = Math.round(size * s * 0.92)
-  const snappedLine = Math.ceil(lineHeightPx / (GRID.baseline * s)) * GRID.baseline * s
+  const fontSize = size * s
+  const snappedLine = headlineLineHeight(fontSize, s)
 
   return (
-    <div style={{ minWidth: 0, overflow: 'hidden' }}>
+    <div style={{ minWidth: 0 }}>
       {lines.map((line) => (
         <h1
           key={line}
           style={{
             fontFamily: brand.fonts.display,
-            fontSize: size * s,
+            fontSize,
             fontWeight: 800,
             lineHeight: `${snappedLine}px`,
             letterSpacing: '-0.03em',
             textTransform: 'uppercase',
             margin: 0,
+            padding: 0,
             color: dark ? brand.colors.white : brand.colors.black,
             overflowWrap: 'break-word',
             wordBreak: 'break-word',
@@ -317,9 +340,16 @@ export function PhotoModule({
         height: resolvedHeight,
         overflow: 'hidden',
         border: `${3 * s}px solid ${border}`,
+        borderTop: 'none',
         background: dark ? '#111' : '#f0f0f0',
       }}
     >
+      <ChromaticBars
+        s={s}
+        direction="horizontal"
+        thickness={3 * s}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 2 }}
+      />
       <img
         ref={imgRef}
         src={getStockPhoto(stockIndex)}
@@ -345,11 +375,11 @@ export function PhotoModule({
             background: dark ? brand.colors.black : brand.colors.white,
             padding: `${10 * s}px ${16 * s}px`,
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderTop: `${2 * s}px solid ${dark ? 'rgba(255,255,255,0.2)' : brand.colors.black}`,
+            flexDirection: 'column',
+            alignItems: 'stretch',
           }}
         >
+          <ChromaticBars s={s} direction="horizontal" thickness={2 * s} style={{ marginBottom: 10 * s }} />
           <PartnerLockupStrip s={s} dark={dark} compact />
         </div>
       )}

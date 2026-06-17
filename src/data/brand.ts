@@ -11,6 +11,8 @@ export const brand = {
     display: "'Rubik', sans-serif",
     body: "'Inter', 'Geist', system-ui, sans-serif",
   },
+  /** Chromatic bars — burnt → bright → solid → muted */
+  chromatic: ['#E37226', '#FE980F', '#F4B12E', '#E1B43E'] as const,
   event: {
     name: 'GUILD SA AI Buildathon 01',
     date: '01 August 2026',

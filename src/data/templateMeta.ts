@@ -359,12 +359,27 @@ export function resolveHeaderMeta(asset: CampaignAsset): { headerTag: string; he
 export function resolveIndex(asset: CampaignAsset, visual: TemplateVisualConfig): string {
   if (asset.content.slideIndex) return String(asset.content.slideIndex).padStart(2, '0')
   if (asset.content.countdownDays !== undefined) return String(asset.content.countdownDays)
-  return visual.indexLabel ?? visual.heroNumber ?? '01'
+  if (visual.indexLabel) return visual.indexLabel
+  if (visual.heroNumber) return visual.heroNumber
+  return '01'
 }
 
 export function resolveHeroNumber(asset: CampaignAsset, visual: TemplateVisualConfig): string | undefined {
   if (asset.content.countdownDays !== undefined) return String(asset.content.countdownDays)
   return visual.heroNumber
+}
+
+/** Body-only hero number — suppressed when the same value already appears in the header. */
+export function resolveBodyHeroNumber(
+  asset: CampaignAsset,
+  visual: TemplateVisualConfig,
+  headerShowsIndex: boolean,
+): string | undefined {
+  const hero = resolveHeroNumber(asset, visual)
+  if (!hero) return undefined
+  if (!headerShowsIndex) return hero
+  if (hero === resolveIndex(asset, visual)) return undefined
+  return hero
 }
 
 export function resolveLayoutVariant(slug: string, asset: CampaignAsset): TemplateVisualConfig['layoutVariant'] {
