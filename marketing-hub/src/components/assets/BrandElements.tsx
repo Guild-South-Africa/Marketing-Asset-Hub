@@ -106,33 +106,13 @@ export function EduvosLogo({
   return <LogoImage src={getEduvosLogo(dark)} alt="Eduvos" height={height} width={width} />
 }
 
-/** Four-column partner bar — Powered By GUILD SA + Lovable + Eduvos + VelozTech (inspo lockup) */
+/** Three-column partner bar — Lovable + Eduvos + VelozTech */
 export function EcosystemPartnerBar({ s = 1 }: { s?: number }) {
   const logoHeight = 32 * s
   const labelColor = 'rgba(255,255,255,0.55)'
   const divider = 'rgba(255,255,255,0.15)'
 
   const partners = [
-    {
-      label: 'Powered By',
-      node: (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 * s }}>
-          <GuildMasterSymbol height={logoHeight} />
-          <span
-            style={{
-              fontFamily: brand.fonts.display,
-              fontWeight: 700,
-              fontSize: 20 * s,
-              letterSpacing: '0.04em',
-              color: brand.colors.white,
-              textTransform: 'uppercase',
-            }}
-          >
-            GUILD SA
-          </span>
-        </div>
-      ),
-    },
     {
       label: 'Ecosystem Partner',
       node: <LovableLogo height={logoHeight} dark />,
@@ -153,7 +133,7 @@ export function EcosystemPartnerBar({ s = 1 }: { s?: number }) {
         marginTop: lh(2, s),
         background: brand.colors.black,
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(3, 1fr)',
         alignItems: 'stretch',
       }}
     >

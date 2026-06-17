@@ -7,8 +7,8 @@ export function TimelinePage() {
       <div>
         <h1 className="font-display text-2xl font-bold min-[414px]:text-3xl">Campaign Timeline</h1>
         <p className="mt-2 text-sm text-zinc-400 sm:text-base">
-          Posting schedule leading up to {brand.event.date}. Pre-campaign begins 7–10 days before registration opens.
-          Each asset is assigned to Instagram, LinkedIn, WhatsApp, or Campus Screens.
+          Posting schedule from tomorrow through {brand.event.date}. Pre-event assets are spread across the window;
+          event-week and print assets land on event day.
         </p>
       </div>
       <TimelineDashboard />
