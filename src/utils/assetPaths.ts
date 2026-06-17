@@ -11,11 +11,14 @@ import eduvosBlue from '@event/Partners/Eduvos/Eduvos blue.png'
 import eduvosWhite from '@event/Partners/Eduvos/Eduvos white.png'
 
 /** Load stock photos from Stocks/ — glob keeps dev/build in sync when files are replaced */
-const stockModules = import.meta.glob<string>('../../../Stocks/brand stock*.png', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-})
+const stockModules = import.meta.glob<string>(
+  ['../../assets/Stocks/brand stock*.png', '../../../Stocks/brand stock*.png'],
+  {
+    eager: true,
+    query: '?url',
+    import: 'default',
+  },
+)
 
 function stockNumber(path: string): number {
   return Number(path.match(/brand stock(\d+)\.png/i)?.[1] ?? 0)

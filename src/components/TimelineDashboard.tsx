@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { buildTimeline, campaignMilestones } from '../data/timeline'
+import { buildTimeline, campaignMilestones, getCampaignWindow } from '../data/timeline'
 import type { Channel } from '../data/types'
 
 const channelColors: Record<Channel, string> = {
@@ -14,13 +14,24 @@ const channelColors: Record<Channel, string> = {
 
 export function TimelineDashboard() {
   const timeline = buildTimeline()
+  const window = getCampaignWindow()
 
   return (
     <div className="space-y-8">
+      <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3 sm:px-5">
+        <p className="text-xs uppercase tracking-wider text-zinc-500">Posting window</p>
+        <p className="mt-1 font-display text-base font-bold text-white sm:text-lg">
+          {window.startLabel}
+          <span className="mx-2 font-normal text-zinc-500">→</span>
+          {window.endLabel}
+          <span className="ml-2 text-sm font-normal text-zinc-500">({window.spanDays} days)</span>
+        </p>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
+          { label: 'Campaign Starts', date: campaignMilestones.campaignStart },
           { label: 'Tease Phase Starts', date: campaignMilestones.teaseStart },
-          { label: 'Pre-Campaign Starts', date: campaignMilestones.preCampaignStart },
           { label: 'Registration Opens', date: campaignMilestones.registrationOpen },
           { label: 'Event Day', date: campaignMilestones.eventDate },
         ].map(({ label, date }) => (

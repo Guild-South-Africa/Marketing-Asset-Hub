@@ -1,26 +1,37 @@
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 const rootDir = fileURLToPath(new URL('.', import.meta.url))
 const workspaceRoot = path.resolve(rootDir, '..')
+const bundledAssets = path.resolve(rootDir, 'assets')
 
-export default defineConfig(({ mode }) => ({
-  base: process.env.BASE_PATH ?? (mode === 'production' ? '/Marketing-Asset-Hub/' : '/'),
+/** Prefer parent workspace folders locally; fall back to bundled assets/ for standalone deploys (e.g. Netlify). */
+function assetDir(...segments: string[]): string {
+  const parentPath = path.resolve(workspaceRoot, ...segments)
+  const bundledPath = path.resolve(bundledAssets, ...segments)
+  if (fs.existsSync(parentPath)) return parentPath
+  return bundledPath
+}
+
+export default defineConfig(() => ({
+  // Netlify and most hosts use "/". GitHub Pages sets BASE_PATH=/Marketing-Asset-Hub/ in CI.
+  base: process.env.BASE_PATH ?? '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      '@brand': path.resolve(workspaceRoot, 'Brand'),
-      '@event': path.resolve(workspaceRoot, 'Event'),
-      '@stocks': path.resolve(workspaceRoot, 'Stocks'),
-      '@templates': path.resolve(workspaceRoot, 'Marketing/png'),
+      '@brand': assetDir('Brand'),
+      '@event': assetDir('Event'),
+      '@stocks': assetDir('Stocks'),
+      '@templates': assetDir('Marketing', 'png'),
     },
   },
   server: {
     fs: {
-      allow: [workspaceRoot],
+      allow: [workspaceRoot, bundledAssets],
     },
   },
 }))

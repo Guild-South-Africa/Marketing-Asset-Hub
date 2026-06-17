@@ -1,4 +1,4 @@
-import campaignIndex from '../../../Marketing/canva/campaign-index.json'
+import campaignIndex from './campaign-index.json'
 import type { CampaignAsset, CampaignPhase } from './types'
 import { phaseLabels } from './types'
 import { brand } from './brand'
