@@ -54,6 +54,7 @@ export async function exportAssetAsPng(
   const clone = createExportClone(element, width, height)
 
   try {
+    await document.fonts.ready
     await waitForImages(clone)
     fixCoverImages(clone)
     await new Promise<void>((resolve) => {
