@@ -6,7 +6,8 @@ import { bl, gridScale, gutter, lh, marginX, mediaHeight } from '../../../data/g
 import { getStockPhoto } from '../../../utils/assetPaths'
 import { applyCoverFit } from '../../../utils/imageCover'
 import { ctaFontSize, headlineLineHeight, indexFontSize, indexLineHeight } from '../layoutUtils'
-import { BrandShape, ChromaticBars, DitherOverlay, GeoCornerBrackets, GeoSectionDivider, HeadlineGeometry, PosterBackdrop } from '../BrandDecor'
+import { BackdropLayer, type BackdropVariant } from '../BackdropLayer'
+import { BrandShape, ChromaticBars, DitherOverlay, GeoCornerBrackets, GeoSectionDivider, HeadlineGeometry } from '../BrandDecor'
 import { EcosystemLockup, GuildHeaderLogo, PartnerLockupStrip } from '../BrandElements'
 
 const MONO = "'Inter', ui-monospace, monospace"
@@ -21,14 +22,25 @@ interface CanvasProps {
   width: number
   height: number
   dark?: boolean
+  backdrop?: BackdropVariant
+  backdropSeed?: number
   children: ReactNode
 }
 
-export function DesignCanvas({ width, height, dark = false, children }: CanvasProps) {
+export function DesignCanvas({
+  width,
+  height,
+  dark = false,
+  backdrop = 'flat',
+  backdropSeed = 0,
+  children,
+}: CanvasProps) {
   const s = scale(width)
+  const useThreeJs = backdrop === 'threejs'
 
   return (
     <div
+      {...(useThreeJs ? { 'data-webgl-poster': true } : {})}
       style={{
         width,
         height,
@@ -42,7 +54,14 @@ export function DesignCanvas({ width, height, dark = false, children }: CanvasPr
         isolation: 'isolate',
       }}
     >
-      <PosterBackdrop s={s} dark={dark} />
+      <BackdropLayer
+        backdrop={backdrop}
+        width={width}
+        height={height}
+        dark={dark}
+        s={s}
+        seed={backdropSeed}
+      />
       <div
         style={{
           position: 'relative',
@@ -100,7 +119,8 @@ export function MetaHeader({ s, dark = false, index }: MetaHeaderProps) {
             letterSpacing: '0.1em',
             lineHeight: `${lh(1, s)}px`,
             marginTop: bl(1, s),
-            opacity: dark ? 0.65 : 0.75,
+            color: dark ? brand.colors.white : brand.colors.black,
+            opacity: dark ? 0.75 : 0.75,
           }}
         >
           AI BUILDATHON 01
@@ -130,6 +150,7 @@ export function MetaHeader({ s, dark = false, index }: MetaHeaderProps) {
             lineHeight: `${lh(1, s)}px`,
             marginTop: index ? bl(1, s) : lh(1, s),
             overflowWrap: 'break-word',
+            color: dark ? brand.colors.white : brand.colors.black,
           }}
         >
           <div>{brand.event.date.toUpperCase()}</div>
@@ -167,6 +188,7 @@ export function MetaFooter({ s, dark, cta, showPartnerLockup = true }: MetaFoote
           fontSize: 17 * s,
           letterSpacing: '0.06em',
           textTransform: 'uppercase',
+          color: dark ? brand.colors.white : brand.colors.black,
         }}
       >
         <div style={{ gridColumn: '1 / 5', minWidth: 0, lineHeight: `${lh(1, s)}px`, overflowWrap: 'break-word' }}>
@@ -397,6 +419,7 @@ export function BodyText({ s, text, dark, maxWidth }: { s: number; text: string;
           lineHeight: `${lh(1, s)}px`,
           marginTop: 0,
           maxWidth: maxWidth ? maxWidth * s : lh(28, s),
+          color: dark ? brand.colors.white : brand.colors.black,
           opacity: dark ? 0.88 : 0.9,
           fontWeight: 400,
           minWidth: 0,
@@ -445,6 +468,7 @@ export function BulletList({ s, items, dark }: { s: number; items: string[]; dar
         paddingLeft: lh(1, s),
         fontSize: 24 * s,
         lineHeight: `${lh(1, s)}px`,
+        color: dark ? brand.colors.white : brand.colors.black,
         opacity: dark ? 0.9 : 0.85,
       }}
     >
@@ -582,6 +606,7 @@ export function StatsRow({
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
               marginTop: 8 * s,
+              color: dark ? brand.colors.white : brand.colors.black,
               opacity: dark ? 0.75 : 0.8,
               overflowWrap: 'break-word',
               wordBreak: 'break-word',

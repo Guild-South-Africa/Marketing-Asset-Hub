@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import type { CampaignAsset } from '../data/types'
+import { RenderModeProvider } from '../context/RenderModeContext'
 import { useContainerWidth } from '../hooks/useContainerWidth'
 import { AssetFrame } from './assets/AssetFrame'
 import { AssetRenderer } from './assets/AssetRenderer'
@@ -24,9 +25,11 @@ export function AssetThumbnail({ asset }: AssetThumbnailProps) {
         className="overflow-hidden bg-zinc-950"
         style={{ width: previewWidth, height: cappedHeight, maxWidth: '100%' }}
       >
-        <AssetFrame asset={asset} previewWidth={previewWidth}>
-          <AssetRenderer asset={asset} />
-        </AssetFrame>
+        <RenderModeProvider mode="thumbnail">
+          <AssetFrame asset={asset} previewWidth={previewWidth}>
+            <AssetRenderer asset={asset} />
+          </AssetFrame>
+        </RenderModeProvider>
       </div>
     </div>
   )

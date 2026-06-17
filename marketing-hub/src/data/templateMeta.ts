@@ -21,6 +21,8 @@ export interface TemplateVisualConfig {
   /** Top-right index display */
   indexLabel?: string
   layoutVariant?: 'poster' | 'social-giant' | 'square' | 'landscape' | 'landscape-dark' | 'landscape-partner' | 'signage' | 'countdown' | 'name-tag' | 'event-program' | 'ecosystem'
+  /** Canvas background: flat 2D decor or animated Three.js wireframes */
+  backdrop?: 'flat' | 'threejs'
 }
 
 const templates = campaignIndex as TemplateMeta[]
@@ -321,4 +323,11 @@ export function resolveLayoutVariant(slug: string, asset: CampaignAsset): Templa
   if (asset.content.cards && asset.content.cards.length >= 4) return 'landscape'
   if (asset.content.stats && asset.content.stats.length >= 4) return 'poster'
   return visual.layoutVariant ?? 'poster'
+}
+
+export function resolveBackdrop(asset: CampaignAsset): 'flat' | 'threejs' {
+  const visual = getVisualConfig(asset.templateSlug)
+  if (visual.backdrop) return visual.backdrop
+  if (asset.layout === 'name-tag') return 'flat'
+  return 'threejs'
 }

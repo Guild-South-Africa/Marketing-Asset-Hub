@@ -10,6 +10,7 @@ import {
   resolveHeadline,
   resolveHeroNumber,
   resolveIndex,
+  resolveBackdrop,
   resolveLayoutVariant,
   shouldShowEyebrow,
 } from '../../data/templateMeta'
@@ -50,7 +51,9 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
 
   const visual = getVisualConfig(asset.templateSlug)
   const s = scale(asset.width)
-  const dark = visual.dark ?? asset.content.dark ?? false
+  const backdrop = resolveBackdrop(asset)
+  const configDark = visual.dark ?? asset.content.dark ?? false
+  const dark = backdrop === 'threejs' || configDark
   const headline = resolveHeadline(asset, meta)
   const body = resolveBody(asset, meta)
   const cta = resolveFooterCta(asset, visual)
@@ -62,11 +65,17 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
   const canvasDark = dark || variant === 'landscape-dark'
 
   const padX = marginX(s)
+  const canvasBase = {
+    width: asset.width,
+    height: asset.height,
+    backdrop,
+    backdropSeed: asset.stockIndex ?? 0,
+  } as const
 
   switch (variant) {
     case 'social-giant':
       return (
-        <DesignCanvas width={asset.width} height={asset.height} dark={dark}>
+        <DesignCanvas {...canvasBase} dark={dark}>
           <MetaHeader s={s} dark={dark} />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px`, position: 'relative' })}>
             {backgroundHeroNumber && (
@@ -92,7 +101,7 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
 
     case 'countdown':
       return (
-        <DesignCanvas width={asset.width} height={asset.height} dark={dark}>
+        <DesignCanvas {...canvasBase} dark={dark}>
           <MetaHeader
             s={s}
             dark={dark}
@@ -113,7 +122,7 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
 
     case 'square':
       return (
-        <DesignCanvas width={asset.width} height={asset.height} dark={dark}>
+        <DesignCanvas {...canvasBase} dark={dark}>
           <MetaHeader
             s={s}
             dark={dark}
@@ -136,7 +145,7 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
 
     case 'ecosystem':
       return (
-        <DesignCanvas width={asset.width} height={asset.height} dark>
+        <DesignCanvas {...canvasBase} dark>
           <MetaHeader
             s={s}
             dark
@@ -160,7 +169,7 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
                     letterSpacing: '-0.03em',
                     textTransform: 'uppercase',
                     margin: 0,
-                    color: brand.colors.brightOrange,
+                    color: brand.colors.white,
                     overflowWrap: 'break-word',
                     wordBreak: 'break-word',
                   }}
@@ -186,7 +195,7 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
     case 'landscape-dark':
     case 'landscape':
       return (
-        <DesignCanvas width={asset.width} height={asset.height} dark={canvasDark}>
+        <DesignCanvas {...canvasBase} dark={canvasDark}>
           <MetaHeader
             s={s}
             dark={canvasDark}
@@ -220,15 +229,14 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
 
     case 'landscape-partner': {
       const isLovable = asset.templateSlug.includes('lovable')
-      const isDark = visual.dark ?? false
       return (
-        <DesignCanvas width={asset.width} height={asset.height} dark={isDark}>
-          <MetaHeader s={s} dark={isDark} />
+        <DesignCanvas {...canvasBase} dark={dark}>
+          <MetaHeader s={s} dark={dark} />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px`, ...bodyGrid(s) })}>
             <div style={{ gridColumn: '1 / 7', paddingTop: lh(1, s), minWidth: 0 }}>
-              <StackedHeadline s={s} lines={headline} size={isLovable ? 88 : 72} dark={isDark} />
-              <BodyText s={s} text={body} dark={isDark} />
-              {asset.content.list && <BulletList s={s} items={asset.content.list} dark={isDark} />}
+              <StackedHeadline s={s} lines={headline} size={isLovable ? 88 : 72} dark={dark} />
+              <BodyText s={s} text={body} dark={dark} />
+              {asset.content.list && <BulletList s={s} items={asset.content.list} dark={dark} />}
             </div>
             <div style={{ gridColumn: '7 / 13', minWidth: 0, overflow: 'hidden' }}>
               {!isLovable && index && (
@@ -251,53 +259,62 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
                 s={s}
                 stockIndex={asset.stockIndex}
                 height={mediaHeight(16, s)}
-                dark={isDark}
+                dark={dark}
                 showPartnerStrip={isLovable}
               />
             </div>
           </div>
-          <MetaFooter s={s} dark={isDark} cta={cta} />
+          <MetaFooter s={s} dark={dark} cta={cta} />
         </DesignCanvas>
       )
     }
 
     case 'signage':
       return (
-        <DesignCanvas width={asset.width} height={asset.height}>
-          <MetaHeader s={s} dark={false} index={index} />
+        <DesignCanvas {...canvasBase} dark={dark}>
+          <MetaHeader s={s} dark={dark} index={index} />
           <div style={canvasBodyStyle({ padding: `${lh(2, s)}px ${padX}px`, display: 'flex', flexDirection: 'column' })}>
-            <StackedHeadline s={s} lines={headline} size={120} />
-            <BodyText s={s} text={body} maxWidth={900} />
+            <StackedHeadline s={s} lines={headline} size={120} dark={dark} />
+            <BodyText s={s} text={body} maxWidth={900} dark={dark} />
             {asset.content.location && (
-              <p style={{ marginTop: lh(1, s), fontSize: 28 * s, lineHeight: `${lh(1, s)}px`, opacity: 0.7, letterSpacing: '0.06em' }}>
+              <p
+                style={{
+                  marginTop: lh(1, s),
+                  fontSize: 28 * s,
+                  lineHeight: `${lh(1, s)}px`,
+                  opacity: 0.7,
+                  letterSpacing: '0.06em',
+                  color: dark ? brand.colors.white : brand.colors.black,
+                }}
+              >
                 {asset.content.location}
               </p>
             )}
             <div style={{ marginTop: 'auto', paddingTop: lh(2, s) }}>
-              <PhotoModule s={s} stockIndex={asset.stockIndex} height={mediaHeight(30, s)} />
+              <PhotoModule s={s} stockIndex={asset.stockIndex} height={mediaHeight(30, s)} dark={dark} />
             </div>
           </div>
-          <MetaFooter s={s} cta={cta} />
+          <MetaFooter s={s} dark={dark} cta={cta} />
         </DesignCanvas>
       )
 
     case 'name-tag':
       return (
-        <DesignCanvas width={asset.width} height={asset.height}>
-          <MetaHeader s={s} dark={false} />
+        <DesignCanvas {...canvasBase} dark={dark}>
+          <MetaHeader s={s} dark={dark} />
           <div style={canvasBodyStyle({ display: 'flex', alignItems: 'center', padding: `0 ${padX}px` })}>
             <div style={{ flex: 1 }}>
-              <StackedHeadline s={s} lines={headline} size={48} />
-              {body && <BodyText s={s} text={body} />}
+              <StackedHeadline s={s} lines={headline} size={48} dark={dark} />
+              {body && <BodyText s={s} text={body} dark={dark} />}
             </div>
           </div>
-          <EcosystemLockup s={s} />
+          <EcosystemLockup s={s} dark={dark} />
         </DesignCanvas>
       )
 
     case 'event-program':
       return (
-        <DesignCanvas width={asset.width} height={asset.height} dark>
+        <DesignCanvas {...canvasBase} dark>
           <MetaHeader
             s={s}
             dark
@@ -319,7 +336,7 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
     case 'poster':
     default:
       return (
-        <DesignCanvas width={asset.width} height={asset.height} dark={dark}>
+        <DesignCanvas {...canvasBase} dark={dark}>
           <MetaHeader s={s} dark={dark} index={index} />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px`, ...bodyGrid(s), position: 'relative' })}>
             <div style={{ gridColumn: '1 / 7', minWidth: 0, overflow: 'hidden' }}>

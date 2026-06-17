@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import type { CampaignAsset } from '../data/types'
+import { RenderModeProvider } from '../context/RenderModeContext'
 import { useContainerWidth } from '../hooks/useContainerWidth'
 import { AssetFrame } from './assets/AssetFrame'
 import { AssetRenderer } from './assets/AssetRenderer'
@@ -36,9 +37,11 @@ export function AssetViewer({ asset }: AssetViewerProps) {
           Live preview — review below, then download when ready
         </p>
         <div ref={containerRef} className="flex w-full justify-center overflow-x-auto">
-          <AssetFrame ref={exportRef} asset={asset} previewWidth={previewWidth}>
-            <AssetRenderer asset={asset} />
-          </AssetFrame>
+          <RenderModeProvider mode="full">
+            <AssetFrame ref={exportRef} asset={asset} previewWidth={previewWidth}>
+              <AssetRenderer asset={asset} />
+            </AssetFrame>
+          </RenderModeProvider>
         </div>
       </div>
     </div>
