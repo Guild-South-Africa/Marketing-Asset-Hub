@@ -1,6 +1,6 @@
 import type { CampaignAsset } from '../../data/types'
 import { brand } from '../../data/brand'
-import { bl, gutter, lh, marginX, mediaHeight } from '../../data/gridSystem'
+import { gutter, lh, marginX, mediaHeight } from '../../data/gridSystem'
 import {
   getTemplateMeta,
   getVisualConfig,
@@ -8,10 +8,10 @@ import {
   resolveBodyHeroNumber,
   resolveFooterCta,
   resolveHeadline,
-  resolveHeaderMeta,
   resolveHeroNumber,
   resolveIndex,
   resolveLayoutVariant,
+  shouldShowEyebrow,
 } from '../../data/templateMeta'
 import { EcosystemLockup, EcosystemPartnerBar } from './BrandElements'
 import { canvasBodyStyle, indexFontSize } from './layoutUtils'
@@ -21,6 +21,7 @@ import {
   BulletList,
   CardGrid,
   DesignCanvas,
+  EyebrowLabel,
   GiantBackgroundNumber,
   MetaFooter,
   MetaHeader,
@@ -58,7 +59,6 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
   const bodyHeroNumber = resolveBodyHeroNumber(asset, visual, true)
   const backgroundHeroNumber = resolveBodyHeroNumber(asset, visual, false)
   const variant = resolveLayoutVariant(asset.templateSlug, asset)
-  const headerMeta = resolveHeaderMeta(asset)
   const canvasDark = dark || variant === 'landscape-dark'
 
   const padX = marginX(s)
@@ -67,26 +67,15 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
     case 'social-giant':
       return (
         <DesignCanvas width={asset.width} height={asset.height} dark={dark}>
-          <MetaHeader s={s} dark={dark} headerTag={headerMeta.headerTag} headerSeries={headerMeta.headerSeries} />
+          <MetaHeader s={s} dark={dark} />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px`, position: 'relative' })}>
             {backgroundHeroNumber && (
               <GiantBackgroundNumber s={s} value={backgroundHeroNumber} dark={dark} />
             )}
             <div style={{ ...bodyGrid(s), position: 'relative', zIndex: 1, minHeight: 0, height: '100%' }}>
               <div style={{ gridColumn: '1 / 8', minWidth: 0 }}>
-                {asset.content.eyebrow && (
-                  <p
-                    style={{
-                      fontFamily: 'monospace',
-                      fontSize: 16 * s,
-                      letterSpacing: '0.12em',
-                      lineHeight: `${lh(1, s)}px`,
-                      opacity: 0.6,
-                      marginBottom: bl(2, s),
-                    }}
-                  >
-                    {asset.content.eyebrow}
-                  </p>
+                {shouldShowEyebrow(asset.content.eyebrow) && (
+                  <EyebrowLabel s={s} text={asset.content.eyebrow!} dark={dark} />
                 )}
                 <StackedHeadline s={s} lines={headline} size={96} dark={dark} />
                 <BodyText s={s} text={body} dark={dark} />
@@ -107,8 +96,6 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
           <MetaHeader
             s={s}
             dark={dark}
-            headerTag={headerMeta.headerTag}
-            headerSeries={headerMeta.headerSeries}
             index={heroNumber}
           />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px` })}>
@@ -130,24 +117,11 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
           <MetaHeader
             s={s}
             dark={dark}
-            headerTag={headerMeta.headerTag}
-            headerSeries={headerMeta.headerSeries}
             index={visual.indexLabel}
           />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px`, display: 'flex', flexDirection: 'column' })}>
-            {asset.content.eyebrow && (
-              <p
-                style={{
-                  fontSize: 16 * s,
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  lineHeight: `${lh(1, s)}px`,
-                  opacity: 0.55,
-                  marginBottom: bl(1, s),
-                }}
-              >
-                {asset.content.eyebrow}
-              </p>
+            {shouldShowEyebrow(asset.content.eyebrow) && (
+              <EyebrowLabel s={s} text={asset.content.eyebrow!} dark={dark} />
             )}
             <StackedHeadline s={s} lines={headline} size={80} dark={dark} />
             <BodyText s={s} text={body} dark={dark} maxWidth={720} />
@@ -166,26 +140,12 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
           <MetaHeader
             s={s}
             dark
-            headerTag={headerMeta.headerTag}
-            headerSeries={headerMeta.headerSeries}
             index={index}
           />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px`, ...bodyGrid(s) })}>
             <div style={{ gridColumn: '1 / 7', display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
-              {asset.content.eyebrow && (
-                <p
-                  style={{
-                    fontSize: 15 * s,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    lineHeight: `${lh(1, s)}px`,
-                    opacity: 0.55,
-                    marginBottom: bl(1, s),
-                    color: brand.colors.white,
-                  }}
-                >
-                  {asset.content.eyebrow}
-                </p>
+              {shouldShowEyebrow(asset.content.eyebrow) && (
+                <EyebrowLabel s={s} text={asset.content.eyebrow!} dark />
               )}
               {headline[0] && (
                 <StackedHeadline s={s} lines={[headline[0]]} size={72} dark />
@@ -230,25 +190,12 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
           <MetaHeader
             s={s}
             dark={canvasDark}
-            headerTag={headerMeta.headerTag}
-            headerSeries={headerMeta.headerSeries}
             index={index}
           />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px`, ...bodyGrid(s) })}>
             <div style={{ gridColumn: asset.content.cards ? '1 / 13' : '1 / 7', minWidth: 0, overflow: 'hidden' }}>
-              {asset.content.eyebrow && (
-                <p
-                  style={{
-                    fontSize: 15 * s,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    lineHeight: `${lh(1, s)}px`,
-                    opacity: 0.55,
-                    marginBottom: bl(1, s),
-                  }}
-                >
-                  {asset.content.eyebrow}
-                </p>
+              {shouldShowEyebrow(asset.content.eyebrow) && (
+                <EyebrowLabel s={s} text={asset.content.eyebrow!} dark={canvasDark} />
               )}
               <StackedHeadline
                 s={s}
@@ -276,7 +223,7 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
       const isDark = visual.dark ?? false
       return (
         <DesignCanvas width={asset.width} height={asset.height} dark={isDark}>
-          <MetaHeader s={s} dark={isDark} headerTag={headerMeta.headerTag} headerSeries={headerMeta.headerSeries} />
+          <MetaHeader s={s} dark={isDark} />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px`, ...bodyGrid(s) })}>
             <div style={{ gridColumn: '1 / 7', paddingTop: lh(1, s), minWidth: 0 }}>
               <StackedHeadline s={s} lines={headline} size={isLovable ? 88 : 72} dark={isDark} />
@@ -317,7 +264,7 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
     case 'signage':
       return (
         <DesignCanvas width={asset.width} height={asset.height}>
-          <MetaHeader s={s} dark={false} headerTag={headerMeta.headerTag} headerSeries={headerMeta.headerSeries} index={index} />
+          <MetaHeader s={s} dark={false} index={index} />
           <div style={canvasBodyStyle({ padding: `${lh(2, s)}px ${padX}px`, display: 'flex', flexDirection: 'column' })}>
             <StackedHeadline s={s} lines={headline} size={120} />
             <BodyText s={s} text={body} maxWidth={900} />
@@ -337,7 +284,7 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
     case 'name-tag':
       return (
         <DesignCanvas width={asset.width} height={asset.height}>
-          <MetaHeader s={s} dark={false} headerTag={headerMeta.headerTag} headerSeries={headerMeta.headerSeries} />
+          <MetaHeader s={s} dark={false} />
           <div style={canvasBodyStyle({ display: 'flex', alignItems: 'center', padding: `0 ${padX}px` })}>
             <div style={{ flex: 1 }}>
               <StackedHeadline s={s} lines={headline} size={48} />
@@ -354,8 +301,6 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
           <MetaHeader
             s={s}
             dark
-            headerTag={headerMeta.headerTag}
-            headerSeries={headerMeta.headerSeries}
             index={heroNumber ?? index}
           />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px`, ...bodyGrid(s) })}>
@@ -375,22 +320,11 @@ export function TemplateDesign({ asset }: TemplateDesignProps) {
     default:
       return (
         <DesignCanvas width={asset.width} height={asset.height} dark={dark}>
-          <MetaHeader s={s} dark={dark} headerTag={headerMeta.headerTag} headerSeries={headerMeta.headerSeries} index={index} />
+          <MetaHeader s={s} dark={dark} index={index} />
           <div style={canvasBodyStyle({ padding: `${lh(1, s)}px ${padX}px`, ...bodyGrid(s), position: 'relative' })}>
             <div style={{ gridColumn: '1 / 7', minWidth: 0, overflow: 'hidden' }}>
-              {asset.content.eyebrow && (
-                <p
-                  style={{
-                    fontSize: 16 * s,
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                    lineHeight: `${lh(1, s)}px`,
-                    opacity: 0.55,
-                    marginBottom: bl(2, s),
-                  }}
-                >
-                  {asset.content.eyebrow}
-                </p>
+              {shouldShowEyebrow(asset.content.eyebrow) && (
+                <EyebrowLabel s={s} text={asset.content.eyebrow!} dark={dark} />
               )}
               <StackedHeadline s={s} lines={headline} size={112} dark={dark} />
               <BodyText s={s} text={body} dark={dark} />

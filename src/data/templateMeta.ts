@@ -1,6 +1,5 @@
 import campaignIndex from './campaign-index.json'
-import type { CampaignAsset, CampaignPhase } from './types'
-import { phaseLabels } from './types'
+import type { CampaignAsset } from './types'
 import { brand } from './brand'
 
 export interface TemplateMeta {
@@ -71,7 +70,6 @@ const visualConfigs: Record<string, TemplateVisualConfig> = {
   },
   'guildsa-x-twitter-graphics': {
     footerCta: 'BUILD IN PUBLIC',
-    heroNumber: '280',
     layoutVariant: 'landscape',
   },
   'guildsa-whatsapp-share-cards': {
@@ -275,93 +273,26 @@ export function resolveFooterCta(asset: CampaignAsset, visual: TemplateVisualCon
 
 const GENERIC_EYEBROWS = ['GUILD SA / AI BUILDATHON 01']
 
+/** Production/template folio labels — not for rendered campaign copy */
+const TEMPLATE_EYEBROW_PATTERN =
+  /storyboard|poster\s*\/|graphics|carousel\s*series|social\s*media|template|wayfinding|signage\s*\/|name\s*tag/i
+
 function isGenericEyebrow(eyebrow?: string): boolean {
   if (!eyebrow) return true
   return GENERIC_EYEBROWS.some((g) => eyebrow.toUpperCase() === g.toUpperCase())
 }
 
-function headlinePrimary(content: CampaignAsset['content']): string {
-  return Array.isArray(content.headline) ? content.headline.join(' ') : content.headline
+/** Eyebrows safe to show on the canvas — excludes generic and template production labels */
+export function shouldShowEyebrow(eyebrow?: string): boolean {
+  if (!eyebrow || isGenericEyebrow(eyebrow)) return false
+  return !TEMPLATE_EYEBROW_PATTERN.test(eyebrow)
 }
 
-function headlineFirstLine(content: CampaignAsset['content']): string {
-  return Array.isArray(content.headline) ? content.headline[0] : content.headline
-}
-
-function bodyFirstLine(content: CampaignAsset['content']): string | undefined {
-  if (!content.body) return undefined
-  return Array.isArray(content.body) ? content.body[0] : content.body
-}
-
-function phaseCampaignName(phase: CampaignPhase): string {
-  return phaseLabels[phase].split('—')[1]?.trim() ?? phaseLabels[phase]
-}
-
-function resolveHeaderSeries(content: CampaignAsset['content'], phase: CampaignPhase): string {
-  return (
-    content.tagline ??
-    content.subtext?.split('.')[0]?.trim() ??
-    bodyFirstLine(content) ??
-    phaseCampaignName(phase)
-  ).toUpperCase()
-}
-
-/** Center header column — campaign copy only, never production folios like "SLIDE 2 OF 7" */
-export function resolveHeaderMeta(asset: CampaignAsset): { headerTag: string; headerSeries: string } {
-  const { content, phase } = asset
-
-  if (content.slideIndex && content.slideTotal) {
-    const tag = !isGenericEyebrow(content.eyebrow) ? content.eyebrow! : headlineFirstLine(content)
-    const series =
-      (typeof content.body === 'string' ? content.body : undefined) ??
-      content.subtext ??
-      headlinePrimary(content) ??
-      resolveHeaderSeries(content, phase)
-    return {
-      headerTag: tag.toUpperCase(),
-      headerSeries: series.toUpperCase(),
-    }
-  }
-
-  if (content.countdownDays !== undefined) {
-    return {
-      headerTag: headlinePrimary(content).toUpperCase(),
-      headerSeries: (content.countdownMessage ?? content.subtext ?? 'THE COUNTDOWN BEGINS').toUpperCase(),
-    }
-  }
-
-  if (Array.isArray(content.headline) && content.headline.length > 1 && !content.slideTotal) {
-    return {
-      headerTag: content.headline.join(' ').toUpperCase(),
-      headerSeries: (
-        content.countdownMessage ??
-        content.tagline ??
-        content.subtext ??
-        content.cta ??
-        phaseCampaignName(phase)
-      ).toUpperCase(),
-    }
-  }
-
-  if (content.eyebrow && !isGenericEyebrow(content.eyebrow)) {
-    return {
-      headerTag: content.eyebrow.toUpperCase(),
-      headerSeries: resolveHeaderSeries(content, phase),
-    }
-  }
-
-  return {
-    headerTag: headlinePrimary(content).toUpperCase(),
-    headerSeries: resolveHeaderSeries(content, phase),
-  }
-}
-
-export function resolveIndex(asset: CampaignAsset, visual: TemplateVisualConfig): string {
+export function resolveIndex(asset: CampaignAsset, visual: TemplateVisualConfig): string | undefined {
   if (asset.content.slideIndex) return String(asset.content.slideIndex).padStart(2, '0')
   if (asset.content.countdownDays !== undefined) return String(asset.content.countdownDays)
   if (visual.indexLabel) return visual.indexLabel
-  if (visual.heroNumber) return visual.heroNumber
-  return '01'
+  return undefined
 }
 
 export function resolveHeroNumber(asset: CampaignAsset, visual: TemplateVisualConfig): string | undefined {

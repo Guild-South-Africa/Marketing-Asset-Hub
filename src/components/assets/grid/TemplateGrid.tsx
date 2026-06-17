@@ -6,10 +6,12 @@ import { bl, gridScale, gutter, lh, marginX, mediaHeight } from '../../../data/g
 import { getStockPhoto } from '../../../utils/assetPaths'
 import { applyCoverFit } from '../../../utils/imageCover'
 import { ctaFontSize, headlineLineHeight, indexFontSize, indexLineHeight } from '../layoutUtils'
-import { ChromaticBars, DitherOverlay, PosterBackdrop } from '../BrandDecor'
+import { BrandShape, ChromaticBars, DitherOverlay, GeoCornerBrackets, GeoSectionDivider, HeadlineGeometry, PosterBackdrop } from '../BrandDecor'
 import { EcosystemLockup, GuildHeaderLogo, PartnerLockupStrip } from '../BrandElements'
 
 const MONO = "'Inter', ui-monospace, monospace"
+
+export { EyebrowLabel } from '../BrandDecor'
 
 export function scale(width: number): number {
   return gridScale(width)
@@ -62,12 +64,10 @@ export function DesignCanvas({ width, height, dark = false, children }: CanvasPr
 interface MetaHeaderProps {
   s: number
   dark?: boolean
-  headerTag: string
-  headerSeries: string
   index?: string
 }
 
-export function MetaHeader({ s, dark = false, headerTag, headerSeries, index }: MetaHeaderProps) {
+export function MetaHeader({ s, dark = false, index }: MetaHeaderProps) {
   const accent = brand.colors.mutedYellow
   const padX = marginX(s)
   const indexSize = index ? indexFontSize(index, s) : 0
@@ -84,7 +84,7 @@ export function MetaHeader({ s, dark = false, headerTag, headerSeries, index }: 
         alignItems: 'start',
       }}
     >
-      <div style={{ gridColumn: '1 / 5', minWidth: 0 }}>
+      <div style={{ gridColumn: '1 / 7', minWidth: 0 }}>
         <ChromaticBars
           s={s}
           direction="horizontal"
@@ -107,25 +107,7 @@ export function MetaHeader({ s, dark = false, headerTag, headerSeries, index }: 
         </div>
       </div>
 
-      <div
-        style={{
-          gridColumn: '5 / 9',
-          minWidth: 0,
-          fontFamily: MONO,
-          fontSize: 16 * s,
-          letterSpacing: '0.08em',
-          lineHeight: `${lh(1, s)}px`,
-          paddingTop: lh(1, s),
-          overflow: 'hidden',
-          overflowWrap: 'break-word',
-          wordBreak: 'break-word',
-        }}
-      >
-        <div>{headerTag}</div>
-        {headerSeries ? <div style={{ opacity: 0.7 }}>{headerSeries}</div> : null}
-      </div>
-
-      <div style={{ gridColumn: '9 / 13', minWidth: 0, textAlign: 'right', overflow: 'hidden' }}>
+      <div style={{ gridColumn: '7 / 13', minWidth: 0, textAlign: 'right', overflow: 'hidden' }}>
         {index && (
           <div
             style={{
@@ -229,28 +211,30 @@ export function StackedHeadline({ s, lines, size = 108, dark }: HeadlineProps) {
   const snappedLine = headlineLineHeight(fontSize, s)
 
   return (
-    <div style={{ minWidth: 0 }}>
-      {lines.map((line) => (
-        <h1
-          key={line}
-          style={{
-            fontFamily: brand.fonts.display,
-            fontSize,
-            fontWeight: 800,
-            lineHeight: `${snappedLine}px`,
-            letterSpacing: '-0.03em',
-            textTransform: 'uppercase',
-            margin: 0,
-            padding: 0,
-            color: dark ? brand.colors.white : brand.colors.black,
-            overflowWrap: 'break-word',
-            wordBreak: 'break-word',
-          }}
-        >
-          {line}
-        </h1>
-      ))}
-    </div>
+    <HeadlineGeometry s={s} dark={dark} lineCount={lines.length} lineHeightPx={snappedLine}>
+      <div style={{ minWidth: 0 }}>
+        {lines.map((line) => (
+          <h1
+            key={line}
+            style={{
+              fontFamily: brand.fonts.display,
+              fontSize,
+              fontWeight: 800,
+              lineHeight: `${snappedLine}px`,
+              letterSpacing: '-0.03em',
+              textTransform: 'uppercase',
+              margin: 0,
+              padding: 0,
+              color: dark ? brand.colors.white : brand.colors.black,
+              overflowWrap: 'break-word',
+              wordBreak: 'break-word',
+            }}
+          >
+            {line}
+          </h1>
+        ))}
+      </div>
+    </HeadlineGeometry>
   )
 }
 
@@ -331,25 +315,39 @@ export function PhotoModule({
   }, [fitImage, resolvedHeight, width, stockIndex])
 
   return (
-    <div
-      ref={containerRef}
-      data-photo-module
-      style={{
-        position: 'relative',
-        width,
-        height: resolvedHeight,
-        overflow: 'hidden',
-        border: `${3 * s}px solid ${border}`,
-        borderTop: 'none',
-        background: dark ? '#111' : '#f0f0f0',
-      }}
-    >
-      <ChromaticBars
-        s={s}
-        direction="horizontal"
-        thickness={3 * s}
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 2 }}
+    <div style={{ position: 'relative', width }}>
+      <BrandShape
+        shape={4}
+        size={56 * s}
+        opacity={dark ? 0.28 : 0.18}
+        style={{
+          position: 'absolute',
+          left: -12 * s,
+          bottom: lh(3, s),
+          zIndex: 2,
+          pointerEvents: 'none',
+        }}
       />
+      <div
+        ref={containerRef}
+        data-photo-module
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: resolvedHeight,
+          overflow: 'hidden',
+          border: `${3 * s}px solid ${border}`,
+          borderTop: 'none',
+          background: dark ? '#111' : '#f0f0f0',
+        }}
+      >
+        <ChromaticBars
+          s={s}
+          direction="horizontal"
+          thickness={3 * s}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 2 }}
+        />
+        <GeoCornerBrackets s={s} dark={dark} />
       <img
         ref={imgRef}
         src={getStockPhoto(stockIndex)}
@@ -383,6 +381,7 @@ export function PhotoModule({
           <PartnerLockupStrip s={s} dark={dark} compact />
         </div>
       )}
+      </div>
     </div>
   )
 }
@@ -390,39 +389,51 @@ export function PhotoModule({
 export function BodyText({ s, text, dark, maxWidth }: { s: number; text: string; dark?: boolean; maxWidth?: number }) {
   if (!text) return null
   return (
-    <p
-      style={{
-        fontSize: 24 * s,
-        lineHeight: `${lh(1, s)}px`,
-        marginTop: lh(1, s),
-        maxWidth: maxWidth ? maxWidth * s : lh(28, s),
-        opacity: dark ? 0.88 : 0.9,
-        fontWeight: 400,
-        minWidth: 0,
-        overflowWrap: 'break-word',
-        wordBreak: 'break-word',
-      }}
-    >
-      {text}
-    </p>
+    <>
+      <GeoSectionDivider s={s} style={{ marginTop: lh(1, s) }} />
+      <p
+        style={{
+          fontSize: 24 * s,
+          lineHeight: `${lh(1, s)}px`,
+          marginTop: 0,
+          maxWidth: maxWidth ? maxWidth * s : lh(28, s),
+          opacity: dark ? 0.88 : 0.9,
+          fontWeight: 400,
+          minWidth: 0,
+          overflowWrap: 'break-word',
+          wordBreak: 'break-word',
+        }}
+      >
+        {text}
+      </p>
+    </>
   )
 }
 
 export function Tagline({ s, text, dark }: { s: number; text: string; dark?: boolean }) {
   return (
-    <p
-      style={{
-        marginTop: lh(1, s),
-        fontSize: 24 * s,
-        fontWeight: 600,
-        lineHeight: `${lh(1, s)}px`,
-        color: brand.colors.brightOrange,
-        letterSpacing: '0.03em',
-        opacity: dark ? 1 : 0.95,
-      }}
-    >
-      {text}
-    </p>
+    <div style={{ marginTop: lh(1, s), minWidth: 0 }}>
+      <ChromaticBars
+        s={s}
+        direction="horizontal"
+        thickness={Math.max(2, 2 * s)}
+        length={bl(4, s)}
+        style={{ marginBottom: bl(1, s), opacity: 0.9 }}
+      />
+      <p
+        style={{
+          fontSize: 24 * s,
+          fontWeight: 600,
+          lineHeight: `${lh(1, s)}px`,
+          color: brand.colors.brightOrange,
+          letterSpacing: '0.03em',
+          opacity: dark ? 1 : 0.95,
+          margin: 0,
+        }}
+      >
+        {text}
+      </p>
+    </div>
   )
 }
 
@@ -470,14 +481,23 @@ export function CardGrid({
         <div
           key={card.title}
           style={{
+            position: 'relative',
             border: `${2 * s}px solid ${dark ? 'rgba(255,255,255,0.25)' : brand.colors.black}`,
+            borderTop: 'none',
             padding: 16 * s,
+            paddingTop: 12 * s,
             background: i % 2 === 0 ? (dark ? '#111' : brand.colors.white) : brand.colors.mutedYellow,
             color: brand.colors.black,
             minWidth: 0,
             overflow: 'hidden',
           }}
         >
+          <ChromaticBars
+            s={s}
+            direction="horizontal"
+            thickness={2 * s}
+            style={{ position: 'absolute', top: 0, left: 0, right: 0 }}
+          />
           {card.icon && <div style={{ fontSize: 28 * s }}>{card.icon}</div>}
           <div
             style={{
@@ -548,6 +568,13 @@ export function StatsRow({
           >
             {stat.value}
           </div>
+          <ChromaticBars
+            s={s}
+            direction="horizontal"
+            thickness={Math.max(2, 2 * s)}
+            length={bl(5, s)}
+            style={{ marginTop: 8 * s, marginBottom: 8 * s, opacity: 0.85 }}
+          />
           <div
             style={{
               fontFamily: MONO,
