@@ -1,5 +1,11 @@
 import html2canvas from 'html2canvas'
 import { GIFEncoder, applyPalette, quantize } from 'gifenc'
+import {
+  captureBackdropLayer,
+  triggerWebGlCaptureFrame,
+  waitForWebGlCanvas,
+} from './webglBackdropCapture'
+import { isMobileDevice } from './webglRenderSize'
 import { fixCoverImages } from './imageCover'
 
 export interface ExportOptions {
@@ -124,7 +130,7 @@ function downloadBlob(blob: Blob, filename: string): void {
 
 /** Ask the live WebGL scene to render one frame before capture */
 function captureWebGlPosterFrame(): void {
-  window.dispatchEvent(new Event('webgl-poster-capture'))
+  triggerWebGlCaptureFrame()
 }
 
 function waitFrames(count = 2): Promise<void> {
@@ -139,13 +145,16 @@ function waitFrames(count = 2): Promise<void> {
   })
 }
 
-/** Clone export root at native size and capture DOM layer (ignores WebGL canvas) */
+/** Clone export root at native size and capture DOM overlay (transparent — backdrop composited separately). */
 async function renderDomLayerCanvas(
   exportRoot: HTMLElement,
   width: number,
   height: number,
 ): Promise<HTMLCanvasElement> {
   const clone = createExportClone(exportRoot, width, height)
+
+  const poster = clone.querySelector('[data-webgl-poster]') as HTMLElement | null
+  if (poster) poster.style.background = 'transparent'
 
   try {
     await document.fonts.ready
@@ -166,15 +175,16 @@ async function renderDomLayerCanvas(
       scrollY: 0,
       windowWidth: width,
       windowHeight: height,
-      ignoreElements: (el) => el.matches('canvas[data-webgl-scene]'),
+      ignoreElements: (el) =>
+        el.matches('canvas[data-webgl-scene]') || el.matches('[data-backdrop-layer]'),
     })
   } finally {
     clone.remove()
   }
 }
 
-function compositeWebGlFrame(
-  webglCanvas: HTMLCanvasElement,
+function compositeBackdropFrame(
+  backdropCanvas: HTMLCanvasElement,
   domCanvas: HTMLCanvasElement | null,
   width: number,
   height: number,
@@ -187,11 +197,44 @@ function compositeWebGlFrame(
 
   ctx.fillStyle = '#000000'
   ctx.fillRect(0, 0, width, height)
-  ctx.drawImage(webglCanvas, 0, 0, width, height)
+  ctx.drawImage(backdropCanvas, 0, 0, width, height)
   if (domCanvas) {
     ctx.drawImage(domCanvas, 0, 0, width, height)
   }
   return output
+}
+
+async function snapshotLiveWebGlFrame(
+  webglCanvas: HTMLCanvasElement,
+  width: number,
+  height: number,
+): Promise<HTMLCanvasElement> {
+  captureWebGlPosterFrame()
+  await waitFrames(isMobileDevice() ? 4 : 2)
+
+  const output = document.createElement('canvas')
+  output.width = width
+  output.height = height
+  const ctx = output.getContext('2d')
+  if (!ctx) throw new Error('Could not create WebGL snapshot')
+
+  try {
+    ctx.drawImage(webglCanvas, 0, 0, width, height)
+    return output
+  } catch {
+    const dataUrl = webglCanvas.toDataURL('image/png')
+    if (!dataUrl || dataUrl === 'data:,') throw new Error('WebGL snapshot failed')
+    await new Promise<void>((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, width, height)
+        resolve()
+      }
+      img.onerror = () => reject(new Error('WebGL snapshot failed'))
+      img.src = dataUrl
+    })
+    return output
+  }
 }
 
 /** Animated GIF — WebGL poster only; composites motion + GUILD overlay */
@@ -212,8 +255,8 @@ export async function exportAssetAsGif(
   }
 
   const exportRoot = (element.closest('[data-export-root]') as HTMLElement | null) ?? element
-  const webglCanvas = exportRoot.querySelector('canvas[data-webgl-scene]') as HTMLCanvasElement | null
-  if (!webglCanvas) throw new Error('WebGL canvas not found')
+  const webglCanvas = await waitForWebGlCanvas(exportRoot)
+  const canAnimate = webglCanvas?.dataset.webglReady === 'true'
 
   await document.fonts.ready
 
@@ -222,6 +265,7 @@ export async function exportAssetAsGif(
   const gifH = Math.round(height * scale)
 
   const domCanvas = await renderDomLayerCanvas(exportRoot, width, height)
+  const staticBackdrop = canAnimate ? null : await captureBackdropLayer(exportRoot, width, height)
 
   const scratch = document.createElement('canvas')
   scratch.width = gifW
@@ -234,10 +278,12 @@ export async function exportAssetAsGif(
   const encoder = GIFEncoder()
 
   for (let i = 0; i < frameCount; i++) {
-    captureWebGlPosterFrame()
-    await waitFrames(2)
+    const backdropFrame =
+      canAnimate && webglCanvas
+        ? await snapshotLiveWebGlFrame(webglCanvas, width, height)
+        : staticBackdrop!
 
-    const frame = compositeWebGlFrame(webglCanvas, domCanvas, width, height)
+    const frame = compositeBackdropFrame(backdropFrame, domCanvas, width, height)
     scratchCtx.drawImage(frame, 0, 0, gifW, gifH)
     const { data } = scratchCtx.getImageData(0, 0, gifW, gifH)
 
@@ -258,15 +304,10 @@ async function exportWebGlPoster(
   { filename, width, height }: ExportOptions,
 ): Promise<void> {
   const exportRoot = (element.closest('[data-export-root]') as HTMLElement | null) ?? element
-  const webglCanvas = exportRoot.querySelector('canvas[data-webgl-scene]') as HTMLCanvasElement | null
 
-  if (!webglCanvas) throw new Error('WebGL canvas not found')
-
-  captureWebGlPosterFrame()
   await document.fonts.ready
-  await waitFrames(2)
-
+  const backdropCanvas = await captureBackdropLayer(exportRoot, width, height)
   const domCanvas = await renderDomLayerCanvas(exportRoot, width, height)
-  const output = compositeWebGlFrame(webglCanvas, domCanvas, width, height)
+  const output = compositeBackdropFrame(backdropCanvas, domCanvas, width, height)
   downloadCanvas(output, filename)
 }

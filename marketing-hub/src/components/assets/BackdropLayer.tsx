@@ -21,17 +21,22 @@ interface BackdropLayerProps {
 export function BackdropLayer({ backdrop, width, height, dark, s, seed }: BackdropLayerProps) {
   const renderMode = useRenderMode()
 
+  let layer: React.ReactNode
   if (backdrop === 'flat') {
-    return <PosterBackdrop s={s} dark={dark} />
-  }
-
-  if (renderMode === 'thumbnail') {
-    return <StaticPosterBackground seed={seed} />
+    layer = <PosterBackdrop s={s} dark={dark} />
+  } else if (renderMode === 'thumbnail') {
+    layer = <StaticPosterBackground seed={seed} />
+  } else {
+    layer = (
+      <Suspense fallback={<StaticPosterBackground seed={seed} />}>
+        <ThreeJsBackdropScene width={width} height={height} seed={seed} />
+      </Suspense>
+    )
   }
 
   return (
-    <Suspense fallback={<StaticPosterBackground seed={seed} />}>
-      <ThreeJsBackdropScene width={width} height={height} seed={seed} />
-    </Suspense>
+    <div data-backdrop-layer aria-hidden style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+      {layer}
+    </div>
   )
 }

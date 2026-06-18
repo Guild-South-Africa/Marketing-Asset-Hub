@@ -40,11 +40,11 @@ export function DesignCanvas({
 
   return (
     <div
-      {...(useThreeJs ? { 'data-webgl-poster': true } : {})}
+      {...(useThreeJs ? { 'data-webgl-poster': true, 'data-backdrop-seed': backdropSeed } : {})}
       style={{
         width,
         height,
-        background: dark ? brand.colors.black : brand.colors.white,
+        background: useThreeJs ? 'transparent' : dark ? brand.colors.black : brand.colors.white,
         color: dark ? brand.colors.white : brand.colors.black,
         fontFamily: brand.fonts.body,
         display: 'flex',
